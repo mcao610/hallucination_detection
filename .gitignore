@@ -130,3 +130,4 @@ dmypy.json
 
 # My ignore
 notebooks/path_config.json
+jupyter.sh
