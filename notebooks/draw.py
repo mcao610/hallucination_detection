@@ -249,26 +249,30 @@ def draw_auc(target, probs, labels, colors, fig_name=None):
 def plot_hist(taskname, posteriors, priors, save_fig=True):
     n_bins = 10
     fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(nrows=2, ncols=2, figsize=(7.5, 3.5))
+    my_blue = (153 / 255, 204 / 255, 1.0, 0.55)
+    my_green = (0 / 255, 204 / 255, 102 / 255, 0.6)
+    my_edge = (0, 0, 0, 0.55)
+    my_green_edge = (0, 153 / 255, 76 / 255, 0.55)
     
-    _, bins, _ = ax0.hist(posteriors[0], n_bins, density=True, histtype='bar', color='blue', label='Non-hallucinated', edgecolor='blue', alpha=0.55)
-    ax0.hist(posteriors[1], bins=bins + 0.13, density=True, histtype='bar', color='darkgreen', label='Factual hallucination', edgecolor='darkgreen', alpha=0.6)
+    _, bins, _ = ax0.hist(posteriors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
+    ax0.hist(posteriors[1], bins=bins + 0.13, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
     ax0.set_ylim([0., 1.1])
     ax0.legend(prop={'size': 11})
     ax0.set_ylabel('CMLM', fontsize=12)
     
-    _, bins, _ = ax1.hist(posteriors[0], n_bins, density=True, histtype='bar', color='blue', label='Non-hallucinated', edgecolor='blue', alpha=0.55)
-    ax1.hist(posteriors[2], bins=bins + 0.12, density=True, histtype='bar', color='red', label='Non-factual Hallucination', edgecolor='red', alpha=0.55)
+    _, bins, _ = ax1.hist(posteriors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
+    ax1.hist(posteriors[2], bins=bins + 0.12, density=True, histtype='bar', facecolor='red', label='Non-factual Hallucination', edgecolor='red', alpha=0.50)
     ax1.set_ylim([0., 1.1])
     ax1.legend(prop={'size': 11})
     ax1.set_yticklabels([])
     
-    _, bins, _ = ax2.hist(priors[0], n_bins, density=True, histtype='bar', color='blue', label='Non-hallucinated', edgecolor='blue', alpha=0.55)
-    ax2.hist(priors[1], bins=bins + 0.25, density=True, histtype='bar', color='darkgreen', label='Factual hallucination', edgecolor='darkgreen', alpha=0.6)
+    _, bins, _ = ax2.hist(priors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
+    ax2.hist(priors[1], bins=bins + 0.25, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
     ax2.set_ylabel('MLM', fontsize=12)
     
     # Make a multiple-histogram of data-sets with different length.
-    _, bins, _ = ax3.hist(priors[0], n_bins, density=True, histtype='bar', color='blue', label='Non-hallucinated', edgecolor='blue', alpha=0.55)
-    ax3.hist(priors[2], bins=bins + 0.26, density=True, histtype='bar', color='red', label='Non-factual hallucination', edgecolor='red', alpha=0.55)
+    _, bins, _ = ax3.hist(priors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
+    ax3.hist(priors[2], bins=bins + 0.26, density=True, histtype='bar', facecolor='red', label='Non-factual hallucination', edgecolor='red', alpha=0.50)
     ax3.set_yticklabels([])
     
     fig.text(0.5, -0.005, 'Prediction Entropy', ha='center', fontsize=12)
