@@ -17,7 +17,7 @@ def plot_scatter(input_data,
     
     for i, data in enumerate(input_data):
         ax.scatter([d[0] for d in data], 
-                   [d[1] for d in data], c=colors[i], s=[(d[0] + d[1]) * 100 + 40 for d in data], label=labels[i], alpha=0.7)
+                   [d[1] for d in data], c=colors[i], s=64, label=labels[i], alpha=0.7)
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
