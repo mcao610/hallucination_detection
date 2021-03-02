@@ -130,8 +130,8 @@ dmypy.json
 
 # My ignore
 notebooks/path_config.json
-jupyter.sh
 data/annotated_with_probability.json
 notebooks/classifiers/*
 data/Maynez_entity_data_with_prob.json
 notebooks/figures/*
+jupyter.sh
