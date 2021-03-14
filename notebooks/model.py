@@ -25,6 +25,41 @@ class ConditionalSequenceGenerator:
         self.bart.eval()
         self.bart.half()
         
+    def tokenize_target(self, input_str, left_pad=False):
+        """BPE-encode a sentence (or multiple sentences).
+
+        Args:
+            input_str (str or List[str]): input sentence to be tokenized.
+            left_pad (bool): self-explained.
+
+        Return:
+            prev_output_tokens (torch.Tensor): [batch_size, length]
+            target (torch.Tensor): [batch_size, length]
+            tgt_lengths (torch.Tensor): [batch_size]
+            
+        """
+        if type(input_str) == type(''):
+            input_str = [input_str]
+
+        prev_ids, tgt_ids = [], []
+        for ins in input_str:
+            tokens = self.bart.bpe.encode(ins)  # <mask>: 1279 27932 29
+            calibration = 1
+            if len(tokens.split(" ")) > min(self.max_positions) - calibration:
+                tokens = " ".join(tokens.split(" ")[: min(self.max_positions) - calibration])
+            
+            prev_tokens = "</s> " + tokens
+            tgt_tokens = tokens + " </s>"
+            
+            tgt_ids.append(self.encode_line(tgt_tokens, append_eos=False).long())
+            prev_ids.append(self.encode_line(prev_tokens, append_eos=False).long())
+
+        prev_output_tokens = collate_tokens(prev_ids, pad_idx=1, left_pad=left_pad).cuda()
+        target = collate_tokens(tgt_ids, pad_idx=1, left_pad=left_pad).cuda()
+        tgt_lengths = torch.sum(target != 1, dim=1).cuda()
+
+        return prev_output_tokens, target, tgt_lengths
+        
     def tokenize(self, input_str, append_bos=False, append_eos=True, left_pad=True):
         """BPE-encode a sentence (or multiple sentences).
 
@@ -70,6 +105,31 @@ class ConditionalSequenceGenerator:
         input_ids = self.tokenizer(input_str, return_tensors='pt', padding=True)['input_ids'].cuda()
         input_lengths = torch.sum(input_ids != 1, dim=1).cuda()
         return input_ids, input_lengths
+    
+    def encode_decode(self, src_input, tgt_input):
+        """
+        Args:
+            src_input: (List[str])
+            tgt_input: (List[str])
+            
+        """
+        src_tokens, src_lengths = self.tokenize(src_input, append_bos=False)
+        prev_output_tokens, target, tgt_lengths = self.tokenize_target(tgt_input, left_pad=False)
+
+        with torch.no_grad():
+            encoder_out = self.bart.model.encoder(src_tokens, src_lengths=src_lengths)
+            decoder_out = self.bart.model.decoder(prev_output_tokens, encoder_out=encoder_out, features_only=False)
+
+            probs = nn.functional.softmax(decoder_out[0], dim=-1)
+            tgt_token_probs = torch.gather(probs, 2, target.unsqueeze(-1)).squeeze(2)
+
+            # mask <pad> with probability 1.0
+            max_tgt_length = tgt_lengths.max().item()
+            tgt_lengths = tgt_lengths - 1
+            tgt_mask = torch.arange(max_tgt_length)[None, :].cuda() < tgt_lengths[:, None]
+            tgt_token_probs.masked_fill_(tgt_mask == False, 1.0)
+
+        return tgt_token_probs
     
     def generate(self, src_input, tgt_input=None):
         """Conditional generation.

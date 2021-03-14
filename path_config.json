@@ -4,6 +4,7 @@
     "bart.large.cnn": "/home/mcao610/scratch/BART_models/bart.large.cnn",
     "data_name_or_path": "/home/mcao610/scratch/summarization/XSum/fairseq_files/xsum-bin",
     "xsum_cmlm_bos": "/home/mcao610/scratch/BART_models/xsum_cedar_cmlm",
+    "xsum_cmlm_ent_bos": "/home/mcao610/scratch/BART_models/xsum_cmlm_ent",
     "xsum_cmlm_scratch": "/home/mcao610/scratch/BART_models/xsum_cmlm_scratch_warmup_5000_step_15000",
     "xsum_cmlm_scratch_cedar": "/home/mcao610/scratch/BART_models/xsum_cmlm_scratch_cedar",
     "xsum_cmlm_scratch_cedar_warmup_5000": "/home/mcao610/scratch/BART_models/xsum_cmlm_scratch_cedar_warmup_5000_step_15000",

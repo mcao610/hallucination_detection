@@ -1,6 +1,6 @@
 import os
 import json
-
+import torch
 
 def read_lines(file_path):
     files = []
@@ -114,7 +114,7 @@ def prepare_mlm_inputs(source, target, ent_parts=None):
 
 
 def prepare_cmlm_inputs(source, target, ent_parts=None):
-    """For Masked Language Model."""
+    """For Conditional Masked Language Model."""
     if ent_parts is None:
         ent_parts = nlp(target).to_json()['ents']
     
@@ -131,6 +131,24 @@ def prepare_cmlm_inputs(source, target, ent_parts=None):
         positions.append((e['start'] + 4, e['end'] + 4))
 
     return inputs, targets, positions, entities
+
+
+def prepare_cmlm_ent_inputs(source, target, ent_parts=None):
+    """For Entity Conditional Masked Language Model."""
+    if ent_parts is None:
+        ent_parts = nlp(target).to_json()['ents']
+    
+    inputs, targets, entities = [], [], []
+
+    for e in ent_parts:
+        masked_hypothesis = target[0: e['start']] + '###' + target[e['end']:]
+        masked_hypothesis = '<s> ' + masked_hypothesis + ' <\s> ' + source
+        inputs.append(masked_hypothesis)
+        targets.append('<s> ' + target[e['start']: e['end']])
+        
+        entities.append(target[e['start']: e['end']])
+
+    return inputs, targets, entities
 
 
 def process_document(raw_doc):
