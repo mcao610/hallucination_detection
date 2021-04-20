@@ -67,6 +67,27 @@ def get_cmlm_probability(generator, src_input, tgt_input, position, entity):
     return probs
 
 
+def get_probability_parallel(generator, src_input, tgt_input, position, entity, mask_filling=False):
+    """Get entities probability in parallel decoding.
+
+    Args:
+        generator: model
+        args*: outputs from prepare_cmlm_inputs()
+
+    """
+    token_probs, target = generator.encode_decode(src_input, tgt_input=tgt_input, mask_filling=mask_filling)
+
+    probs = []
+    for p, tok, tokp, e in zip(position, target, token_probs, entity):
+        if mask_filling:
+            assert tok[0].item() == 0
+            tok, tokp = tok[1:], tokp[1:]
+        tok = [generator.decode_func(i.unsqueeze(0)) for i in tok]
+        probs.append(get_probability(p, tok, tokp, e).item())
+
+    return probs
+
+
 def get_prior_probability(generator, src_input, tgt_input, position, entity):
     """Tokenize input with a special <mask> token."""
     assert len(src_input) == len(tgt_input), "source & target length should match."

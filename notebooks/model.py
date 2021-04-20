@@ -25,7 +25,7 @@ class ConditionalSequenceGenerator:
         self.bart.eval()
         self.bart.half()
         
-    def tokenize_target(self, input_str, left_pad=False):
+    def tokenize_target(self, input_str, left_pad=False, append_eos=False):
         """BPE-encode a sentence (or multiple sentences).
 
         Args:
@@ -48,6 +48,8 @@ class ConditionalSequenceGenerator:
             if len(tokens.split(" ")) > min(self.max_positions) - calibration:
                 tokens = " ".join(tokens.split(" ")[: min(self.max_positions) - calibration])
             
+            if append_eos:
+                tokens = "<s> " + tokens
             prev_tokens = "</s> " + tokens
             tgt_tokens = tokens + " </s>"
             
@@ -106,16 +108,20 @@ class ConditionalSequenceGenerator:
         input_lengths = torch.sum(input_ids != 1, dim=1).cuda()
         return input_ids, input_lengths
     
-    def encode_decode(self, src_input, tgt_input):
+    def encode_decode(self, src_input, tgt_input, mask_filling=False):
         """
         Args:
             src_input: (List[str])
             tgt_input: (List[str])
             
         """
-        src_tokens, src_lengths = self.tokenize(src_input, append_bos=False)
-        prev_output_tokens, target, tgt_lengths = self.tokenize_target(tgt_input, left_pad=False)
-
+        if mask_filling:
+            src_tokens, src_lengths = self.tokenize_with_mask(src_input)
+            prev_output_tokens, target, tgt_lengths = self.tokenize_target(tgt_input, left_pad=False, append_eos=True)
+        else:
+            src_tokens, src_lengths = self.tokenize(src_input, append_bos=False)
+            prev_output_tokens, target, tgt_lengths = self.tokenize_target(tgt_input, left_pad=False)
+        
         with torch.no_grad():
             encoder_out = self.bart.model.encoder(src_tokens, src_lengths=src_lengths)
             decoder_out = self.bart.model.decoder(prev_output_tokens, encoder_out=encoder_out, features_only=False)
@@ -129,7 +135,7 @@ class ConditionalSequenceGenerator:
             tgt_mask = torch.arange(max_tgt_length)[None, :].cuda() < tgt_lengths[:, None]
             tgt_token_probs.masked_fill_(tgt_mask == False, 1.0)
 
-        return tgt_token_probs
+        return tgt_token_probs, target
     
     def generate(self, src_input, tgt_input=None):
         """Conditional generation.
