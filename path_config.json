@@ -1,4 +1,5 @@
 {
+    "bart.base": "/home/mcao610/scratch/BART_models/bart.base",
     "bart.large": "/home/mcao610/scratch/BART_models/bart.large",
     "bart.large.xsum": "/home/mcao610/scratch/BART_models/bart.large.xsum",
     "bart.large.cnn": "/home/mcao610/scratch/BART_models/bart.large.cnn",
