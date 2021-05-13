@@ -93,12 +93,13 @@ def plot(taskname,
     _ = axHisty.hist(y[b_subset], color=colors[1], bins=np.arange(y_min, y_max, 0.3)*np.std(priors), orientation='horizontal', alpha=0.7)
     _ = axHisty.hist(y[r_subset], color=colors[0], bins=np.arange(y_min, y_max, 0.3)*np.std(priors), orientation='horizontal', alpha=0.7)
 
-    ax.legend(loc='lower right')
+    ax.legend(loc='lower right', fontsize=10)
     ax.set_xlim(np.min(xx_1), np.max(xx_1))
     ax.set_ylim(np.min(yy_1), np.max(yy_1))
     ax.set_xlabel(x_label, fontweight ='bold', fontsize=11)
     ax.set_ylabel(y_label, fontweight ='bold', fontsize=11)
 #     axHistx.set_title(taskname)
+    ax.tick_params(axis='both', which='major', labelsize=11)
     
     plt.tight_layout()
     if save_figure:
@@ -213,9 +214,10 @@ def plot_three(taskname,
     ax.scatter(np.array(pin)[np.nonzero(larray==2)[0]], np.array(priors)[np.nonzero(larray==2)[0]], color=colors[2], 
                edgecolor='black', label=legend_labels[2], marker="D", alpha=0.8)
     
-    ax.legend(loc='lower right')
+    ax.legend(loc='lower right', fontsize=10)
     ax.set_xlabel(x_label, fontweight='bold', fontsize=11)
     ax.set_ylabel(y_label, fontweight='bold', fontsize=11)
+    ax.tick_params(axis='both', which='major', labelsize=11)
     
     plt.tight_layout()
     if save_figure:
@@ -255,28 +257,34 @@ def plot_hist(taskname, posteriors, priors, save_fig=True):
     my_green_edge = (0, 153 / 255, 76 / 255, 0.55)
     
     _, bins, _ = ax0.hist(posteriors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
-    ax0.hist(posteriors[1], bins=bins + 0.13, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
-    ax0.set_ylim([0., 1.1])
+    ax0.hist(posteriors[1], bins=bins, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
+    ax0.set_ylim([0., 6])
     ax0.legend(prop={'size': 11})
-    ax0.set_ylabel('CMLM', fontsize=12)
+    ax0.set_ylabel('CMLM', fontsize=13)
     
     _, bins, _ = ax1.hist(posteriors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
-    ax1.hist(posteriors[2], bins=bins + 0.12, density=True, histtype='bar', facecolor='red', label='Non-factual Hallucination', edgecolor='red', alpha=0.50)
-    ax1.set_ylim([0., 1.1])
+    ax1.hist(posteriors[2], bins=bins, density=True, histtype='bar', facecolor='red', label='Non-factual Hallucination', edgecolor='red', alpha=0.50)
+#     ax1.set_ylim([0., 6])
     ax1.legend(prop={'size': 11})
     ax1.set_yticklabels([])
     
     _, bins, _ = ax2.hist(priors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
-    ax2.hist(priors[1], bins=bins + 0.25, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
-    ax2.set_ylabel('MLM', fontsize=12)
+    ax2.hist(priors[1], bins=bins, density=True, histtype='bar', facecolor=my_green_edge, label='Factual hallucination', edgecolor='darkgreen')
+    ax2.set_ylim([0., 6])
+    ax2.set_ylabel('MLM', fontsize=13)
     
     # Make a multiple-histogram of data-sets with different length.
     _, bins, _ = ax3.hist(priors[0], n_bins, density=True, histtype='bar', facecolor=my_blue, label='Non-hallucinated', edgecolor=my_edge, hatch='//')
-    ax3.hist(priors[2], bins=bins + 0.26, density=True, histtype='bar', facecolor='red', label='Non-factual hallucination', edgecolor='red', alpha=0.50)
+    ax3.hist(priors[2], bins=bins, density=True, histtype='bar', facecolor='red', label='Non-factual hallucination', edgecolor='red', alpha=0.50)
     ax3.set_yticklabels([])
     
-    fig.text(0.5, -0.005, 'Prediction Entropy', ha='center', fontsize=12)
-    fig.text(0.99, 0.5, 'Density', va='center', rotation='vertical', fontsize=12)
+    ax0.tick_params(axis='both', which='major', labelsize=13)
+    ax1.tick_params(axis='both', which='major', labelsize=13)
+    ax2.tick_params(axis='both', which='major', labelsize=13)
+    ax3.tick_params(axis='both', which='major', labelsize=13)
+    
+    fig.text(0.5, -0.005, 'Prediction Probability', ha='center', fontsize=13)
+    fig.text(0.99, 0.5, 'Density', va='center', rotation='vertical', fontsize=13)
     fig.tight_layout()
     if save_fig:
         plt.savefig("figures/" + taskname +'.pdf', bbox_inches="tight")
